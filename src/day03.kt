@@ -3,6 +3,8 @@ import java.io.File
 
 // Sanity check point coordinates and distances with this upper bound.
 const val gridMax = 20000
+const val manhattanDistanceMax = gridMax * 2
+const val pathDistanceMax = gridMax * 10
 
 
 // Origin is lower-left corner of grid.
@@ -12,7 +14,7 @@ enum class Direction { U, D, R, L }
 data class Distance(val value: Int) {
     init {
         require(value >= 0) { "distance $value too small" }
-        require(value <= 2 * gridMax) { "distance $value too big" }
+        require(value <= pathDistanceMax) { "distance $value too big" }
     }
 
     companion object {
@@ -22,6 +24,7 @@ data class Distance(val value: Int) {
 
     operator fun compareTo(other: Distance): Int = this.value.compareTo(other.value)
 
+    operator fun plus(other: Distance): Distance = Distance(this.value + other.value)
 
 }
 
@@ -103,7 +106,7 @@ fun main() {
     println("\n\n----------- Wire2")
     wire2.pointPath.forEach { println(it) }
 
-    var minDistance = Distance(gridMax + gridMax)
+    var minDistance = Distance(manhattanDistanceMax)
     println("\n\n----------- Intersections")
     (wire1.pointSet intersect wire2.pointSet).forEach { println(it) }
 

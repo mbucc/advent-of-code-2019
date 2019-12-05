@@ -1,0 +1,41 @@
+% This feels like cheating.
+var 0..9: p1;
+var 0..9: p2;
+var 0..9: p3;
+var 0..9: p4;
+var 0..9: p5;
+var 0..9: p6;
+
+
+constraint p2 >= p1;
+constraint p3 >= p2;
+constraint p4 >= p3;
+constraint p5 >= p4;
+constraint p6 >= p5;
+
+constraint             (p1 == p2 /\ p2 != p3)
+        \/ (p1 != p2 /\ p2 == p3 /\ p3 != p4)
+        \/ (p2 != p3 /\ p3 == p4 /\ p4 != p5)
+        \/ (p3 != p4 /\ p4 == p5 /\ p5 != p6)
+        \/ (p4 != p5 /\ p5 == p6);
+
+constraint p1 * 10^5 + p2 * 10^4 + p3 * 10^3 + p4 * 10^2 + p5 * 10 + p6 >= 246515;
+constraint p1 * 10^5 + p2 * 10^4 + p3 * 10^3 + p4 * 10^2 + p5 * 10 + p6 <= 739105;
+
+solve satisfy;
+
+% Tail end of output:
+%	==========
+%	%%%mzn-stat: initTime=0.000798
+%	%%%mzn-stat: solveTime=0.010371
+%	%%%mzn-stat: solutions=677
+%	%%%mzn-stat: variables=21
+%	%%%mzn-stat: propagators=23
+%	%%%mzn-stat: propagations=13434
+%	%%%mzn-stat: nodes=1453
+%	%%%mzn-stat: failures=50
+%	%%%mzn-stat: restarts=0
+%	%%%mzn-stat: peakDepth=11
+%	%%%mzn-stat-end
+%	Finished in 246msec
+

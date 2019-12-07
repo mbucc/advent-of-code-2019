@@ -1,6 +1,10 @@
 import java.io.File
 import kotlin.system.exitProcess
 
+fun threePositional() = listOf(
+        ParameterMode.POSITION_MODE,
+        ParameterMode.POSITION_MODE,
+        ParameterMode.POSITION_MODE)
 
 // 7594646
 fun main() {
@@ -16,13 +20,18 @@ fun main() {
     xs[1] = 12
     xs[2] = 2
     println("start1: $xs")
+
     for (i in 0..xs.size step 4) {
         val x = OpCode.from(xs[i])
         if (x == OpCode.HALT) {
             println("end   : $xs")
             exitProcess(0)
         }
-        x.f(i, xs)
+        when (x) {
+            OpCode.ADD -> addWithModes(i, xs, threePositional())
+            OpCode.MULTIPLY -> mulWithModes(i, xs, threePositional())
+            else -> throw IllegalStateException("unexpected opcode $x at position $i")
+        }
         //println("$x  : ${xs}")
     }
 }

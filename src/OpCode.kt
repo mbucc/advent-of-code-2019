@@ -1,23 +1,3 @@
-typealias updater = (Int, MutableList<Int>) -> Unit
-
-fun apply(i: Int, xs: MutableList<Int>, g: (Int, Int) -> Int) {
-    val x = xs[i + 1]
-    val y = xs[i + 2]
-    val z = xs[i + 3]
-    xs[z] = g(xs[x], xs[y])
-}
-
-fun adder(i: Int, xs: MutableList<Int>) {
-    apply(i, xs) { x, y -> x + y }
-}
-
-fun multiplier(i: Int, xs: MutableList<Int>) {
-    apply(i, xs) { x, y -> x * y }
-}
-
-fun noop(i: Int, xs: MutableList<Int>) = Unit
-
-
 // POSITION_MODE means the parameter is a reference (array index); IMMEDIATE_MODE means a value.
 enum class ParameterMode() {
     POSITION_MODE, IMMEDIATE_MODE;
@@ -54,15 +34,17 @@ data class Parameter(val value: Int, val mode: ParameterMode) {
 enum class ParameterCount(val value: Int) {
     ZERO(0),
     ONE(1),
+    TWO( 2),
     THREE(3)
 }
 
-enum class OpCode(val f: updater, val parameterCount: ParameterCount) {
-    ADD(::adder, ParameterCount.THREE),
-    MULTIPLY(::multiplier, ParameterCount.THREE),
-    INPUT(::noop, ParameterCount.ONE),
-    OUTPUT(::noop, ParameterCount.ONE),
-    HALT(::noop, ParameterCount.ZERO);
+enum class OpCode(val parameterCount: ParameterCount) {
+    ADD(ParameterCount.THREE),
+    MULTIPLY(ParameterCount.THREE),
+    INPUT(ParameterCount.ONE),
+    OUTPUT(ParameterCount.ONE),
+    JUMP_IF_TRUE(ParameterCount.TWO),
+    HALT(ParameterCount.ZERO);
 
     companion object {
         @JvmStatic

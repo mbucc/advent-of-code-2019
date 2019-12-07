@@ -10,7 +10,6 @@ fun main() {
     var invalidOpCodeCount = 0
     for (noun in 0..99) {
         for (verb in 0..99) {
-            // Will I even notice this stupidly slow approach with a SSD?  (Nope.)
             val xs = File("./src/day02.input")
                     .readText()
                     .trim('\n')
@@ -28,13 +27,15 @@ fun main() {
                     //println("invalid op code ${xs[i]} at i = $i with (noun, verb) = ($noun, $verb), continuing")
                     break
                 }
-                if (x == OpCode.HALT) {
-                    if (xs[0] == 19690720) {
+                when (x) {
+                    OpCode.ADD -> addWithModes(i, xs, threePositional())
+                    OpCode.MULTIPLY -> mulWithModes(i, xs, threePositional())
+                    OpCode.HALT -> if (xs[0] == 19690720) {
                         println("Found a win with (noun, verb) = ($noun, $verb)")
                         println("100 * noun + verb = ${100*noun + verb}")
                     }
+                    else -> throw IllegalStateException("unexpected opcode $x at position $i")
                 }
-                x.f(i, xs)
             }
 
         }

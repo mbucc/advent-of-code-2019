@@ -34,16 +34,19 @@ data class Parameter(val value: Int, val mode: ParameterMode) {
 enum class ParameterCount(val value: Int) {
     ZERO(0),
     ONE(1),
-    TWO( 2),
+    TWO(2),
     THREE(3)
 }
 
-enum class OpCode(val parameterCount: ParameterCount) {
+enum class OpCode(val parameterCount: ParameterCount, val updatesInstructionPointer : Boolean = false) {
     ADD(ParameterCount.THREE),
     MULTIPLY(ParameterCount.THREE),
     INPUT(ParameterCount.ONE),
     OUTPUT(ParameterCount.ONE),
-    JUMP_IF_TRUE(ParameterCount.TWO),
+    JUMP_IF_TRUE(ParameterCount.TWO, true),
+    JUMP_IF_FALSE(ParameterCount.TWO, true),
+    LESS_THAN(ParameterCount.THREE),
+    EQUALS(ParameterCount.THREE),
     HALT(ParameterCount.ZERO);
 
     companion object {
@@ -54,6 +57,10 @@ enum class OpCode(val parameterCount: ParameterCount) {
                     2 -> MULTIPLY
                     3 -> INPUT
                     4 -> OUTPUT
+                    5 -> JUMP_IF_TRUE
+                    6 -> JUMP_IF_FALSE
+                    7 -> LESS_THAN
+                    8 -> EQUALS
                     99 -> HALT
                     // TODO: Make a total function with https://github.com/michaelbull/kotlin-result
                     else -> throw IllegalArgumentException("invalid OpCode $x")
@@ -72,7 +79,9 @@ data class OpCodeWithParameters(val opcode: OpCode, val parameterModes: List<Par
         // Output parameters must be positional, not immediate.
         when (opcode) {
             OpCode.ADD,
-            OpCode.MULTIPLY -> require(parameterModes[2] == ParameterMode.POSITION_MODE)
+            OpCode.MULTIPLY,
+            OpCode.LESS_THAN,
+            OpCode.EQUALS -> require(parameterModes[2] == ParameterMode.POSITION_MODE)
             OpCode.INPUT -> require(parameterModes[0] == ParameterMode.POSITION_MODE)
             else -> Unit // No other opcodes write, so OK.
         }

@@ -28,8 +28,8 @@ fun main() {
             exitProcess(0)
         }
         when (x) {
-            OpCode.ADD -> addWithModes(i, xs, threePositional())
-            OpCode.MULTIPLY -> mulWithModes(i, xs, threePositional())
+            OpCode.ADD -> add(i, xs, threePositional())
+            OpCode.MULTIPLY -> multiply(i, xs, threePositional())
             else -> throw IllegalStateException("unexpected opcode $x at position $i")
         }
         //println("$x  : ${xs}")

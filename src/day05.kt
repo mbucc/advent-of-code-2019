@@ -24,14 +24,14 @@ fun writeOutput(i: Int, xs: MutableList<Int>, outputs: MutableList<Output>, mode
     outputs.add(x)
 }
 
-fun addWithModes(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
+fun add(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
     val a = getValueByMode(i + 1, xs, parameterModes[0])
     val b = getValueByMode(i + 2, xs, parameterModes[1])
     val c = xs[i + 3]
     xs[c] = a + b
 }
 
-fun mulWithModes(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
+fun multiply(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
     val a = getValueByMode(i + 1, xs, parameterModes[0])
     val b = getValueByMode(i + 2, xs, parameterModes[1])
     val c = xs[i + 3]
@@ -74,8 +74,8 @@ fun main() {
     loop@ while (i < xs.size) {
         val x = OpCodeWithParameters.from(xs[i])
         when (x.opcode) {
-            OpCode.ADD -> addWithModes(i, xs, x.parameterModes)
-            OpCode.MULTIPLY -> mulWithModes(i, xs, x.parameterModes)
+            OpCode.ADD -> add(i, xs, x.parameterModes)
+            OpCode.MULTIPLY -> multiply(i, xs, x.parameterModes)
             OpCode.INPUT -> readInput(i, xs, inputs.pop()!!)
             OpCode.OUTPUT -> writeOutput(i, xs, outputs, x.parameterModes[0])
             OpCode.HALT -> break@loop

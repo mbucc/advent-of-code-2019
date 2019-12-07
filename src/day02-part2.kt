@@ -28,8 +28,8 @@ fun main() {
                     break
                 }
                 when (x) {
-                    OpCode.ADD -> addWithModes(i, xs, threePositional())
-                    OpCode.MULTIPLY -> mulWithModes(i, xs, threePositional())
+                    OpCode.ADD -> add(i, xs, threePositional())
+                    OpCode.MULTIPLY -> multiply(i, xs, threePositional())
                     OpCode.HALT -> if (xs[0] == 19690720) {
                         println("Found a win with (noun, verb) = ($noun, $verb)")
                         println("100 * noun + verb = ${100*noun + verb}")

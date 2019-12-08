@@ -1,5 +1,3 @@
-import java.io.File
-
 data class SpaceObject(val value: String) {
     init {
         val msg = "must be a letter or a digit: '$value'"
@@ -29,7 +27,7 @@ data class Orbit(val center: SpaceObject, val inOrbit: SpaceObject) {
 
 data class OrbitMapEntry(val value: SpaceObject, var children: List<OrbitMapEntry>?) {
     fun dump(depth: Int = 0): String {
-        var y: String = ""
+        var y = ""
         repeat(depth) { y += "|  " }
         y += "+ " + this.value.value + "\n"
         if (this.children != null) {
@@ -44,16 +42,17 @@ data class OrbitMapEntry(val value: SpaceObject, var children: List<OrbitMapEntr
 }
 
 
-fun mapEachSpaceObjectToItsOrbiters(xs: List<Orbit>): Map<SpaceObject, List<SpaceObject>> = xs.groupBy(
-        Orbit::center,
-        Orbit::inOrbit).toMap()
+fun mapEachSpaceObjectToItsOrbiters(xs: List<Orbit>): Map<SpaceObject, List<SpaceObject>> =
+        xs.groupBy(
+                Orbit::center,
+                Orbit::inOrbit).toMap()
 
 
 fun universalCenterOfMass() = SpaceObject("COM")
 
 
-// Recurse through orbiters of orbiters and build the full orbit map.
-fun buildOrbitMap(lookup: Map<SpaceObject, List<SpaceObject>>, xs: List<OrbitMapEntry>?) {
+// Recursively build an orbit map rooted at each orbit map entry in the given list.
+fun buildOrbitChildMap(lookup: Map<SpaceObject, List<SpaceObject>>, xs: List<OrbitMapEntry>?) {
 
     if (xs.isNullOrEmpty()) {
         return
@@ -63,14 +62,14 @@ fun buildOrbitMap(lookup: Map<SpaceObject, List<SpaceObject>>, xs: List<OrbitMap
         val y = lookup[x.value]
         if (y != null && y.isNotEmpty()) {
             x.children = y.map(SpaceObject::asOrbitMapEntry)
-            buildOrbitMap(lookup, x.children)
+            buildOrbitChildMap(lookup, x.children)
         } else {
             x.children = null
         }
     }
 }
 
-fun countTotalOrbits(x: OrbitMapEntry, depth: Int, accum : Int) : Int {
+fun countTotalOrbits(x: OrbitMapEntry, depth: Int, accum: Int): Int {
     if (x.children.isNullOrEmpty()) {
         return accum
     }
@@ -79,8 +78,8 @@ fun countTotalOrbits(x: OrbitMapEntry, depth: Int, accum : Int) : Int {
 
     var newAccum = accum
 
-    for (x in children) {
-        newAccum += depth + countTotalOrbits(x, depth + 1, accum)
+    for (child in children) {
+        newAccum += depth + countTotalOrbits(child, depth + 1, accum)
     }
 
     val n = children.size
@@ -89,27 +88,11 @@ fun countTotalOrbits(x: OrbitMapEntry, depth: Int, accum : Int) : Int {
 
 
 fun main() {
-    val orbits = File("./src/day06.input")
-            .readText()
-            .split("\n")
-            .filterNot { it.trim().isEmpty() }
-            .map { Orbit.from(it) }
 
+    val orbits = readOrbitsFromDisk()
     println("orbits.size = ${orbits.size}")
 
-    val spaceObjectToOrbiters = mapEachSpaceObjectToItsOrbiters(orbits)
-
-    val orbiters =
-            spaceObjectToOrbiters[universalCenterOfMass()]
-            ?: error(
-                    "Something is really wrong, everything revolves around the universal " +
-                    "center of mass.")
-
-    val centerOfTheUniverse = OrbitMapEntry(
-            universalCenterOfMass(),
-            orbiters.map(SpaceObject::asOrbitMapEntry))
-
-    buildOrbitMap(spaceObjectToOrbiters, centerOfTheUniverse.children)
+    val centerOfTheUniverse = buildOrbitMap(orbits)
 
     println(centerOfTheUniverse.dump())
 

@@ -29,3 +29,35 @@ four values: ZERO, ONE, TWO, THREE.  There is nothing to test.
 All these types also makes method arguments clearer.  I'm a fan of short variable names
 (like you use in math, "Let X equal ...") but only if the method is really short and there
 are not a lot of values.  Having a verbose type name let's you have short variable names.
+
+
+Day 6
+------------------------------------------------------------------------------------------
+
+Punting on functional representation of tree.  Canonical Haskell implementation has union
+type of node and leaf.  Also, couldn't figure out how to build the tree without using
+mutable children, which required a sprinkling of !! coercions.   Trying to catch up, and
+did not stop to figure out how to do this.
+
+	New Kotlin stuff:
+
+		repeat
+
+			var y: String = ""
+			repeat(depth) { y += "|  " }
+
+		groupBy -- convert a list of pairs into a map of key to list
+
+			val xs : List<Orbit> = getOrbits()
+			val m : Map<SpaceObject, List<SpaceObject>> =
+				xs.groupBy(
+					Orbit::center,
+
+					Orbit::inOrbit).toMap()
+
+		!! coercion (hack) to clear the compiler error (e.g., day06-part2.kt:57):
+
+			Smart cast to 'List<OrbitalMap>' is impossible, because 'treeRoot.children'
+			is a mutable property that could have been changed by this time.
+
+

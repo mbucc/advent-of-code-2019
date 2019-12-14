@@ -1,7 +1,3 @@
-import java.io.File
-import java.util.Stack
-
-
 private fun firstParam(
         i: Int,
         xs: MutableList<Int>,
@@ -17,35 +13,87 @@ private fun secondParam(
 private fun setThirdParam(
         i: Int,
         xs: MutableList<Int>,
-        value : Int) {
+        value: Int) {
+    debug("   set xs[${xs[i + 3]}] = $value")
     xs[xs[i + 3]] = value
 }
 
-fun jumpIfTrue(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) =
-        if (0 != firstParam(i, xs, parameterModes))
-            secondParam(i, xs, parameterModes)
-        else
-            i + parameterModes.size + 1
+fun jumpIfTrue(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>): Int {
+    val nextInstructionPointer =
+            if (0 != firstParam(i, xs, parameterModes))
+                secondParam(i, xs, parameterModes)
+            else
+                i + parameterModes.size + 1
+    debug("jumpIfTrue: jump from $i to $nextInstructionPointer")
+    return nextInstructionPointer
+}
 
-fun jumpIfFalse(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) =
-        if (0 == firstParam(i, xs, parameterModes))
-            secondParam(i, xs, parameterModes)
-        else
-            i + parameterModes.size + 1
+fun jumpIfFalse(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>): Int {
+    val nextInstructionPointer =
+            if (0 == firstParam(i, xs, parameterModes))
+                secondParam(i, xs, parameterModes)
+            else
+                i + parameterModes.size + 1
+    debug("jumpIfTrue: jump from $i to $nextInstructionPointer")
+    return nextInstructionPointer
+}
+
+fun lessThan(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
+    debug("lessThan")
+    if (firstParam(i, xs, parameterModes) < secondParam(i, xs, parameterModes))
+        setThirdParam(i, xs, 1)
+    else
+        setThirdParam(i, xs, 0)
+
+}
 
 
-fun lessThan(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) =
-        if (firstParam(i, xs, parameterModes) < secondParam(i, xs, parameterModes))
-            setThirdParam(i, xs, 1)
-        else
-            setThirdParam(i, xs, 0)
+fun equals(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
+    debug("equals")
+    if (firstParam(i, xs, parameterModes) == secondParam(i, xs, parameterModes))
+        setThirdParam(i, xs, 1)
+    else
+        setThirdParam(i, xs, 0)
+}
 
+fun exec(program: IntCodeProgram, inputs: List<Input>): List<Output> {
 
-fun equals(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) =
-        if (firstParam(i, xs, parameterModes) == secondParam(i, xs, parameterModes))
-            setThirdParam(i, xs, 1)
-        else
-            setThirdParam(i, xs, 0)
+    debug("exec with inputs = $inputs")
+
+    var inputIdx = 0
+
+    // toMutableList() makes a copy
+    val mutableProgram = program.value.toMutableList()
+
+    var instructionPointer = 0
+    val outputs = emptyList<Output>().toMutableList()
+    loop@ while (instructionPointer < program.size) {
+        val x = OpCodeWithParameters.from(mutableProgram[instructionPointer])
+        when (x.opcode) {
+            OpCode.ADD -> add(instructionPointer, mutableProgram, x.parameterModes)
+            OpCode.MULTIPLY -> multiply(instructionPointer, mutableProgram, x.parameterModes)
+            OpCode.INPUT -> readInput(instructionPointer, mutableProgram, inputs[inputIdx++])
+            OpCode.OUTPUT -> writeOutput(
+                    instructionPointer,
+                    mutableProgram,
+                    outputs,
+                    x.parameterModes[0])
+            OpCode.HALT -> break@loop
+            OpCode.JUMP_IF_TRUE -> instructionPointer =
+                    jumpIfTrue(instructionPointer, mutableProgram, x.parameterModes)
+            OpCode.JUMP_IF_FALSE -> instructionPointer =
+                    jumpIfFalse(instructionPointer, mutableProgram, x.parameterModes)
+            OpCode.LESS_THAN -> lessThan(instructionPointer, mutableProgram, x.parameterModes)
+            OpCode.EQUALS -> equals(instructionPointer, mutableProgram, x.parameterModes)
+        }
+
+        if (!x.opcode.updatesInstructionPointer) {
+            instructionPointer += x.opcode.parameterCount.value + 1
+        }
+    }
+
+    return outputs.toList()
+}
 
 
 fun main() {
@@ -58,46 +106,22 @@ fun main() {
     // a double-, triple-, or n-decker sandwich.
     //
     // Note that I'm diverging from pure functional in two ways.  One, parsing the input throws
-    // an exceptions.  Second, I'm changing the list of integers.
+    // an exceptions.  Second, the program is mutable list of integers.
     //
-    val inputs = Stack<Input>()
-    inputs.push(Input(5))
 
-    // Read program from file.
-    val xs = File("./src/day05.input")
-            .readText()
-            .trim('\n')
-            .split(",")
-            .map(String::toInt)
-            .toMutableList()
+    val program = readIntCodeProgramFromFileName("./src/day05.input")
+    val input = listOf(Input(5))
+
 
     // -----------------------------------------------------------------------------------------
-    // PURE FUNCTIONS
+    // PURE FUNCTION
     //
-    var i = 0
-    val outputs = emptyList<Output>().toMutableList()
-    loop@ while (i < xs.size) {
-        val x = OpCodeWithParameters.from(xs[i])
-        when (x.opcode) {
-            OpCode.ADD -> add(i, xs, x.parameterModes)
-            OpCode.MULTIPLY -> multiply(i, xs, x.parameterModes)
-            OpCode.INPUT -> readInput(i, xs, inputs.pop()!!)
-            OpCode.OUTPUT -> writeOutput(i, xs, outputs, x.parameterModes[0])
-            OpCode.HALT -> break@loop
-            OpCode.JUMP_IF_TRUE -> i = jumpIfTrue(i, xs, x.parameterModes)
-            OpCode.JUMP_IF_FALSE -> i = jumpIfFalse(i, xs, x.parameterModes)
-            OpCode.LESS_THAN -> lessThan(i, xs, x.parameterModes)
-            OpCode.EQUALS -> equals(i, xs, x.parameterModes)
-        }
+    val output = exec(program, input)
 
-        if (!x.opcode.updatesInstructionPointer) {
-            i += x.opcode.parameterCount.value + 1
-        }
-    }
 
     // -----------------------------------------------------------------------------------------
     // OUTPUT I/O
     //
-    outputs.forEach { println(it) }
+    output.forEach { println(it) }
 
 }

@@ -2,7 +2,14 @@ import java.io.File
 import java.util.Stack
 
 data class Input(val value: Int)
-data class Output(val index: Int, val Value: Int)
+data class Output(val index: Int, val value: Int) {
+    operator fun compareTo(x: Output): Int {
+        return this.value.compareTo(x.value)
+    }
+
+    val asInput: Input
+        get() = Input(this.value)
+}
 
 
 fun getInput(): Input = Input(1)
@@ -10,24 +17,46 @@ fun getInput(): Input = Input(1)
 
 fun readInput(i: Int, xs: MutableList<Int>, input: Input) {
     val idx = xs[i + 1]
+    debug("$i: readInput: read ${input.value} and save to index $idx")
     xs[idx] = input.value
 }
 
-fun getValueByMode(i: Int, xs: MutableList<Int>, mode: ParameterMode) =
+fun getIndexByMode(i: Int, xs: MutableList<Int>, mode: ParameterMode) =
         when (mode) {
-            ParameterMode.IMMEDIATE_MODE -> xs[i]
-            ParameterMode.POSITION_MODE -> xs[xs[i]]
+            ParameterMode.IMMEDIATE_MODE -> i
+            ParameterMode.POSITION_MODE -> xs[i]
         }
 
-fun writeOutput(i: Int, xs: MutableList<Int>, outputs: MutableList<Output>, mode: ParameterMode) {
-    val x = Output(i, getValueByMode(i + 1, xs, mode))
+fun getValueByMode(i: Int, xs: MutableList<Int>, mode: ParameterMode): Int =
+        xs[getIndexByMode(i, xs, mode)]
+
+fun writeOutput(
+        i: Int,
+        xs: MutableList<Int>,
+        outputs: MutableList<Output>,
+        mode: ParameterMode) {
+    val value = getValueByMode(i + 1, xs, mode)
+    val x = Output(i, value)
+    debug("$i: writeOutput: $value from xs[${getIndexByMode(i + 1, xs, mode)}] in $mode")
     outputs.add(x)
+}
+
+fun debug(msg: String) {
+    if (System.getProperty("DEBUG_PROGRAM") == null) {
+        return
+    }
+    println(msg)
 }
 
 fun add(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
     val a = getValueByMode(i + 1, xs, parameterModes[0])
     val b = getValueByMode(i + 2, xs, parameterModes[1])
     val c = xs[i + 3]
+    debug(
+            "$i: add: xs[$c]" +
+            " = x[${getIndexByMode(i + 1, xs, parameterModes[0])}]" +
+            " + x[${getIndexByMode(i + 2, xs, parameterModes[1])}]" +
+            " = $a + $b")
     xs[c] = a + b
 }
 
@@ -35,6 +64,10 @@ fun multiply(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) 
     val a = getValueByMode(i + 1, xs, parameterModes[0])
     val b = getValueByMode(i + 2, xs, parameterModes[1])
     val c = xs[i + 3]
+    debug("$i: mul: xs[$c]" +
+          " = x[${getIndexByMode(i + 1, xs, parameterModes[0])}]" +
+          " * x[${getIndexByMode(i + 2, xs, parameterModes[1])}]" +
+          " = $a * $b")
     xs[c] = a * b
 }
 

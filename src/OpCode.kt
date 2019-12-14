@@ -26,10 +26,6 @@ enum class ParameterMode() {
     }
 }
 
-data class Parameter(val value: Int, val mode: ParameterMode) {
-
-}
-
 // A ParameterCount is the number of parameters an OpCode takes.
 enum class ParameterCount(val value: Int) {
     ZERO(0),
@@ -76,7 +72,7 @@ data class OpCodeWithParameters(val opcode: OpCode, val parameterModes: List<Par
         require(parameterModes.size == opcode.parameterCount.value)
         { "wrong parameter count ${parameterModes.size}, opcode $opcode requires ${opcode.parameterCount}" }
 
-        // Output parameters must be positional, not immediate.
+        // Require all output parameters to be positional, not immediate.
         when (opcode) {
             OpCode.ADD,
             OpCode.MULTIPLY,

@@ -1,28 +1,54 @@
 import java.io.File
 
 enum class AmplifierPhaseSetting {
-    ZERO, ONE, TWO, THREE, FOUR;
+    ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE;
 
     val asInput: Input
         get() =
             when (this) {
+                // Non-feedback phases
                 ZERO -> Input(0)
                 ONE -> Input(1)
                 TWO -> Input(2)
                 THREE -> Input(3)
                 FOUR -> Input(4)
+                // Feedback Phases
+                FIVE -> Input(5)
+                SIX -> Input(6)
+                SEVEN -> Input(7)
+                EIGHT -> Input(8)
+                NINE -> Input(9)
             }
 }
 
-data class IntCodeProgram(val value: List<Int>) {
-    val size: Int
-        get() = this.value.size
+fun getNormalPhases() = listOf(
+        AmplifierPhaseSetting.ZERO,
+        AmplifierPhaseSetting.ONE,
+        AmplifierPhaseSetting.TWO,
+        AmplifierPhaseSetting.THREE,
+        AmplifierPhaseSetting.FOUR)
 
-    operator fun get(index: Int) = this.value[index]
+fun getFeedbackPhases() = listOf(
+        AmplifierPhaseSetting.FIVE,
+        AmplifierPhaseSetting.SIX,
+        AmplifierPhaseSetting.SEVEN,
+        AmplifierPhaseSetting.EIGHT,
+        AmplifierPhaseSetting.NINE)
+
+data class IntCodeProgram(val program: MutableList<Int>) {
+    val size: Int
+        get() = this.program.size
+
+    operator fun get(index: Int) = this.program[index]
+
+    fun clone(): IntCodeProgram {
+        return IntCodeProgram(this.program.toMutableList())
+    }
 
 }
 
 
+// Phase is not used in day 7 part2.
 data class Amplifier(val phase: AmplifierPhaseSetting, val logic: IntCodeProgram)
 
 
@@ -32,7 +58,8 @@ fun readIntCodeProgramFromFileName(fileName: String) =
                         .readText()
                         .trim('\n')
                         .split(",")
-                        .map(String::toInt))
+                        .map(String::toInt)
+                        .toMutableList())
 
 
 fun amplify(a: Amplifier, b: Input): Output {
@@ -75,28 +102,7 @@ fun amplifierChain(
 }
 
 
-// First call:
-//    ( [A,B,C], [] )
-// Second call:
-//    ( [B,C], [A] )
-//    ( [A,C], [B] )
-//    ( [A,B], [C] )
-// Third call:
-//    ( [C], [A,B] )
-//    ( [B], [A,C] )
-//    ( [C], [B,A] )
-//    ( [A], [B,C] )
-//    ( [B], [C,A] )
-//    ( [A], [C,B] )
-// Fourth call (hit stop condition):
-//    ( [], [A,B,C] )
-//    ( [], [A,C,B] )
-//    ( [], [B,A,C] )
-//    ( [], [B,C,A] )
-//    ( [], [C,A,B] )
-//    ( [], [C,B,A] )
-
-fun getPhaseCandidates(phases: List<AmplifierPhaseSetting>): List<List<AmplifierPhaseSetting>> {
+fun <T> getPhaseCandidates(phases: List<T>): List<List<T>> {
 
     if (phases.size == 1) {
         return listOf(phases)
@@ -104,7 +110,7 @@ fun getPhaseCandidates(phases: List<AmplifierPhaseSetting>): List<List<Amplifier
 
     val head = phases[0]
     val tail = phases.drop(1)
-    val accum1 = mutableListOf<List<AmplifierPhaseSetting>>()
+    val accum1 = mutableListOf<List<T>>()
     for (perm in getPhaseCandidates(tail)) {
         for (i in 0..perm.size) {
             val newPerm = perm.toMutableList()
@@ -117,6 +123,7 @@ fun getPhaseCandidates(phases: List<AmplifierPhaseSetting>): List<List<Amplifier
 }
 
 
+// maxOutputSignal = Output(index=102, value=880726) for phases [TWO, ZERO, ONE, FOUR, THREE]
 fun main() {
 
     // I/O
@@ -127,8 +134,8 @@ fun main() {
     // Functions
     val amp = amplifyWithPhase(logic)
     var maxOutputSignal = Output(0, 0)
-    var bestPhaseSettings : List<AmplifierPhaseSetting> = emptyList()
-    getPhaseCandidates(AmplifierPhaseSetting.values().toList())
+    var bestPhaseSettings: List<AmplifierPhaseSetting> = emptyList()
+    getPhaseCandidates(getNormalPhases())
             .forEach { phaseCandidate ->
                 val eout = amplifierChain(amp, firstInput, phaseCandidate)
                 if (eout > maxOutputSignal) {

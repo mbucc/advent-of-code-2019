@@ -14,7 +14,7 @@ private fun setThirdParam(
         i: Int,
         xs: MutableList<Int>,
         value: Int) {
-    debug("   set xs[${xs[i + 3]}] = $value")
+    debug("    --> set xs[${xs[i + 3]}] = $value")
     xs[xs[i + 3]] = value
 }
 
@@ -24,7 +24,7 @@ fun jumpIfTrue(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>
                 secondParam(i, xs, parameterModes)
             else
                 i + parameterModes.size + 1
-    debug("jumpIfTrue: jump from $i to $nextInstructionPointer")
+    debug("$i: jumpIfTrue (x[${getIndexByMode(i+1, xs, parameterModes[0])}]=${firstParam(i, xs, parameterModes)}): jump from $i to $nextInstructionPointer")
     return nextInstructionPointer
 }
 
@@ -34,26 +34,28 @@ fun jumpIfFalse(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode
                 secondParam(i, xs, parameterModes)
             else
                 i + parameterModes.size + 1
-    debug("jumpIfTrue: jump from $i to $nextInstructionPointer")
+    debug("$i: jumpIfFalse (x[${getIndexByMode(i+1, xs, parameterModes[0])}]=${firstParam(i, xs, parameterModes)}): jump from $i to $nextInstructionPointer")
     return nextInstructionPointer
 }
 
 fun lessThan(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
-    debug("lessThan")
+    debug("$i: lessThan")
     if (firstParam(i, xs, parameterModes) < secondParam(i, xs, parameterModes))
         setThirdParam(i, xs, 1)
     else
         setThirdParam(i, xs, 0)
+    debug("$i: lessThan (x[${getIndexByMode(i+1, xs, parameterModes[0])}] < x[${getIndexByMode(i+2, xs, parameterModes[1])}] = ${firstParam(i, xs, parameterModes)} < ${secondParam(i, xs, parameterModes)}): ")
 
 }
 
 
 fun equals(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {
-    debug("equals")
+    debug("$i: equals")
     if (firstParam(i, xs, parameterModes) == secondParam(i, xs, parameterModes))
         setThirdParam(i, xs, 1)
     else
         setThirdParam(i, xs, 0)
+    debug("$i: equals (x[${getIndexByMode(i+1, xs, parameterModes[0])}] == x[${getIndexByMode(i+2, xs, parameterModes[1])}] = ${firstParam(i, xs, parameterModes)} == ${secondParam(i, xs, parameterModes)}): ")
 }
 
 fun exec(program: IntCodeProgram, inputs: List<Input>): List<Output> {
@@ -63,7 +65,7 @@ fun exec(program: IntCodeProgram, inputs: List<Input>): List<Output> {
     var inputIdx = 0
 
     // toMutableList() makes a copy
-    val mutableProgram = program.value.toMutableList()
+    val mutableProgram = program.program.toMutableList()
 
     var instructionPointer = 0
     val outputs = emptyList<Output>().toMutableList()

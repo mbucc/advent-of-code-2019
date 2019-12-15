@@ -41,11 +41,11 @@ fun writeOutput(
     outputs.add(x)
 }
 
+const val DEBUG_PROGRAM = false
 fun debug(msg: String) {
-    if (System.getProperty("DEBUG_PROGRAM") == null) {
-        return
+    if (DEBUG_PROGRAM) {
+        println(msg)
     }
-    println(msg)
 }
 
 fun add(i: Int, xs: MutableList<Int>, parameterModes: List<ParameterMode>) {

@@ -61,3 +61,13 @@ did not stop to figure out how to do this.
 			is a mutable property that could have been changed by this time.
 
 
+Day 7
+------------------------------------------------------------------------------------------
+Bumps in the road:
+  part 1
+    Test permutations with replacement?  Nope, use each phase just once.
+    Remember how to recursively generate all permutations?  Nope.
+  part 2
+    Process first loop with original phases?  Nope, use feedback phases.
+    Stop when amp writes output?  Nope, block on input.
+    Stop when first amp halts?  Nope, all five.
